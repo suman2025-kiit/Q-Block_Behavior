@@ -1,4 +1,4 @@
-# Q-Block_Behavior
+# Q-Block_Behavior with Trust
 Quantum-Blockchain Meets Internet-of- Behavior for Smarter and Secure Consumer Electronics
 <img width="136" height="206" alt="image" src="https://github.com/user-attachments/assets/723adcd3-2443-451d-af64-a2807402d7c4" />
 
@@ -42,8 +42,10 @@ Predicted labels
 Fidelity scores
 Trust scores
 Blockchain hash records
-Accuracy, ROC-AUC, and latency results
-## # Q-Block_Behavior Adaptive Trust Model
+Accuracy, ROC-AUC, and latency results.
+
+
+#**Q-Block_Behavior Adaptive Trust Model**
 
 Reference implementation of the Adaptive Trust Model used between local
 quantum-classical training and blockchain-validated global aggregation.
