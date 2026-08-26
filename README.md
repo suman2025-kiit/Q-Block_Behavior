@@ -29,7 +29,7 @@ git clone https://github.com/<your-username>/Q-Block_Behavior.git
 cd Q-Block_Behavior
 pip install -r requirements.txt
 
- ## For ruiing and getting the output
+## For ruiing and getting the output
 Run
 python main.py
 Input
@@ -45,7 +45,7 @@ Blockchain hash records
 Accuracy, ROC-AUC, and latency results.
 
 
-#**Q-Block_Behavior Adaptive Trust Model**
+## Quantum Block Behavior based Adaptive Trust Model
 
 Reference implementation of the Adaptive Trust Model used between local
 quantum-classical training and blockchain-validated global aggregation.
@@ -101,3 +101,5 @@ credential, DID-signature, nonce, and Ethereum Keccak-256 verification.
 
 while running the same using the running commands , please store the dataset in appropriate path
 as we have set it as - DATA_PATH = "data/real_time_iob_runtime_dataset.csv", but we are providing some part of the dataset as "Q-Block_Behaviour-dataset.csv" for your reference.
+
+
