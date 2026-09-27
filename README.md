@@ -222,7 +222,8 @@ TON_IoT or physical-device evidence.
 ## License
 
 MIT. Cite the associated manuscript if you use this implementation in research.
-<img width="1326" height="749" alt="Poison" src="https://github.com/user-attachments/assets/d2545d99-e3d0-41e8-8865-32eabf05261d" />
+<img width="932" height="616" alt="Poison_JISA_Table5" src="https://github.com/user-attachments/assets/6fd27a20-7972-43e1-9c9f-9699a49c2397" />
+
 
 
 ## Ruuning using the dataset
