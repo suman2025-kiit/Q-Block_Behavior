@@ -218,9 +218,11 @@ flipping, sign flipping, Gaussian noise, and model replacement at the update
 level. Synthetic behavior is intentionally simple and must not be presented as
 TON_IoT or physical-device evidence.
 
+## The complete coding regarding this is uploaded herewith as a .zip file named: "complete_qblock-poisoning-validation.zip"
 ## License
 
 MIT. Cite the associated manuscript if you use this implementation in research.
+<img width="1326" height="749" alt="Poison" src="https://github.com/user-attachments/assets/d2545d99-e3d0-41e8-8865-32eabf05261d" />
 
 
 ## Ruuning using the dataset
