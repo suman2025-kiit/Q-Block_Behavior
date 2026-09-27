@@ -1,6 +1,6 @@
 # Q-Block_Behavior with Trust
 Quantum-Blockchain Meets Internet-of- Behavior for Smarter and Secure Consumer Electronics
-<img width="136" height="206" alt="image" src="https://github.com/user-attachments/assets/723adcd3-2443-451d-af64-a2807402d7c4" />
+
 
 ##Pre-requisits 
 # Q-Block_Behavior
@@ -95,134 +95,143 @@ replace the simulated validation flags with contract event or call results.
 
 This code is a research prototype; production deployments must use audited
 credential, DID-signature, nonce, and Ethereum Keccak-256 verification.
-# Q-Block_Behavior: Poisoning Detection and Validation
 
-Reference implementation of the poisoning-detection and adaptive-trust stages in
-the **Q-Block_Behavior** workflow. The code follows the order used by Algorithms
-4–5 of the manuscript:
+# Q-Block_Behavior
 
-1. validate each submitted update;
-2. build a coordinate-wise median from authenticated updates;
-3. calculate update consistency and poisoning risk;
-4. update reliability and adaptive trust;
-5. accept or quarantine each update;
-6. aggregate accepted updates and create a chained audit commitment;
-7. report detection rate (DR), false-positive rate (FPR), and update-level attack
-   success rate (ASR).
+GitHub-ready reference implementation for **Q-Block_Behavior: Quantum-Assisted
+Poisoning Detection and Blockchain-Enabled Adaptive Trust for Secure
+Internet-of-Behaviors Systems**.
 
-> **Research-use notice:** the bundled demonstration uses synthetic local model
-> updates so that reviewers can reproduce the detector without the TON_IoT data
-> or a full federated-learning model. Its numerical output is a software test,
-> not a reproduction of the manuscript's experimental table.
+The repository coordinates the five manuscript algorithms:
 
-## Mathematical implementation
+1. IoB preprocessing and artifact construction;
+2. four-component quantum encoding, GHZ-reference fidelity, and prediction;
+3. DID/VC, signature, revocation, nonce, timestamp, and hash validation;
+4. two-pass poisoning detection and trust-weighted aggregation;
+5. seeded validation against label flipping, sign flipping, Gaussian noise, and
+   model replacement.
 
-For authenticated updates, the robust reference is the coordinate-wise median:
+## Scientific-use statement
 
-```text
-reference = median(update_i)
-```
+The executable demo generates synthetic model updates to test the workflow. It
+does **not** manufacture the manuscript's TON_IoT classification results. The
+published Table 5 values are stored separately in
+`reference/manuscript_table5.csv` for traceability and are never substituted for
+computed output. Reproducing the paper requires the public
+`Train_Test_Network.csv` file and the same software/hardware environment stated
+in the manuscript.
 
-The implementation then evaluates
+## Implemented equations and controls
+
+For authenticated device updates, Algorithm 4 first constructs the
+coordinate-wise median reference and then calculates:
 
 ```text
 C_i = (1 + cosine(update_i, reference)) / 2
-
-D_i = ||update_i - reference||_2 / (||reference||_2 + epsilon)
-
-P_i = min(1, omega_1 D_i + omega_2 (1 - cosine(update_i, reference)) / 2)
-
-T_i = clip(alpha F_i + beta V_i + gamma R_i + delta C_i - lambda P_i, 0, 1)
+D_i = ||update_i-reference||_2 / (||reference||_2 + epsilon)
+P_i = min(1, omega_1*D_i + omega_2*(1-cosine)/2)
+R_i(t) = eta*R_i(t-1) + (1-eta)*V_i(t)
+T_i = clip(alpha*F_i + beta*V_i + gamma*R_i + delta*C_i-lambda*P_i, 0, 1)
+w_i = T_i*n_i / sum_j(T_j*n_j)
 ```
 
-Here, `F_i` is the fidelity evidence, `V_i` is the authentication-validation
-flag, `R_i` is historical reliability, `C_i` is consistency, and `P_i` is
-poisoning risk. An update is accepted only when `V_i = 1` and `T_i >= tau_T`.
-All coefficients and thresholds are configurable; the defaults are demonstration
-parameters and should be selected on validation data for a reported experiment.
+An update is accepted only if `V_i=1` and `T_i>=0.70`. If no update is
+accepted, the gateway retains the previous global model.
 
-## Repository structure
+## Repository map
 
 ```text
-config/default.json                  Reproducible demonstration settings
-src/qblock_poisoning/core.py         Equations (37)–(38), trust, aggregation
-src/qblock_poisoning/attacks.py      Four poisoning-attack generators
-src/qblock_poisoning/audit.py        Canonical chained audit commitments
-src/qblock_poisoning/simulation.py   Coordinated validation experiment
-src/qblock_poisoning/cli.py          Command-line entry point
-tests/test_core.py                   Unit and integration tests
-outputs/                             Generated CSV and terminal evidence
-docs/sample_poison_detection_output.jpg  Screenshot from an actual run
+config/manuscript.json                 Paper-aligned parameters
+src/qblock_poisoning/preprocessing.py  TON_IoT loading and fold-safe transforms
+src/qblock_poisoning/quantum.py        ZZ-inspired state and GHZ fidelity
+src/qblock_poisoning/identity.py       Algorithm 3 off-chain validator
+src/qblock_poisoning/core.py           Algorithm 4 trust aggregation
+src/qblock_poisoning/attacks.py        Four attack implementations
+src/qblock_poisoning/simulation.py     Algorithm 5 coordinator
+src/qblock_poisoning/audit.py          Canonical commitments and L2 batches
+contracts/QBlockValidation.sol         Solidity 0.8.24 validation contract
+hardhat/                               Deployment and contract tests
+tests/                                 Unit and end-to-end tests
+reference/manuscript_table5.csv        Reported values, clearly separated
+outputs/                               Reproducible computed demonstration
 ```
 
 ## Quick start
-
-Python 3.10 or newer is recommended.
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
 python -m pip install -e .
-qblock-poisoning --config config/default.json --output-dir outputs
-pytest
+qblock-poisoning simulate --config config/manuscript.json --output-dir outputs
+pytest -q
 ```
 
-To regenerate the JPEG after a run:
+The simulation writes `device_decisions.csv`, `round_metrics.csv`,
+`attack_summary.csv`, `l2_commitments.jsonl`, and `sample_run.txt`.
+
+## TON_IoT preprocessing
+
+Download `Train_Test_Network.csv` from the official TON_IoT source; do not
+commit the dataset to GitHub. Prepare the reproducible subset:
 
 ```bash
-python scripts/render_terminal_screenshot.py \
-  outputs/sample_run.txt docs/sample_poison_detection_output.jpg
+qblock-poisoning prepare-data --csv data/Train_Test_Network.csv \
+  --output-dir outputs/prepared --seed 42 --sample-size 20000
 ```
 
-The CLI writes:
+The command removes timestamps, source/destination IP addresses, ports, and
+`type`; preserves the binary label and attack distribution; and saves selected
+row indices. Fit imputation, one-hot encoding, scaling, PCA, and feature ranking
+inside each training fold only.
 
-- `device_decisions.csv`: per-device fidelity, validation, consistency, risk,
-  reliability, trust, ground truth, and decision;
-- `round_metrics.csv`: TP, TN, FP, FN, DR, FPR, ASR, accepted count, and audit
-  commitment for every round;
-- `attack_summary.csv`: attack-level metrics over all seeds and rounds;
-- `sample_run.txt`: human-readable run summary used to produce the screenshot.
+## Quantum module
 
-## Metric definitions
+The four selected components enter a twice-repeated, linearly entangled
+ZZ-inspired simulator. A separately prepared four-qubit GHZ state is used only
+as the fidelity reference; it is not every sample's encoded state. The NumPy
+implementation makes CI lightweight. `requirements-quantum.txt` lists the
+paper's Qiskit/Aer replication versions.
 
-- **DR** = `TP / (TP + FN)`: fraction of malicious updates quarantined.
-- **FPR** = `FP / (FP + TN)`: fraction of benign updates quarantined.
-- **Update-level ASR** = `FN / (TP + FN)`: fraction of malicious updates that
-  bypassed the detector. It equals `100 - DR` in this detector-only demo.
+## Smart contract
 
-The manuscript may additionally report a **downstream global-model ASR**, defined
-by a task-specific attack objective after aggregation. That quantity requires an
-actual trained model and test set and is intentionally not invented here. Connect
-the returned aggregate to your federated model and implement the objective in the
-evaluation layer if you need that metric.
+The Solidity contract records issuers, credentials, used nonces, artifact
+commitments, and global-model commitments. Run it using:
 
-## Connecting to TON_IoT or a federated training loop
+```bash
+cd hardhat
+npm install
+npx hardhat test
+```
 
-Replace `generate_round()` in `simulation.py` with the outputs of local training.
-Pass one flattened update vector per device to `evaluate_updates()`, together
-with fidelity scores, smart-contract/DID validation flags, prior reliabilities,
-and local sample counts. Do not fit preprocessing or choose thresholds using the
-test partition.
+Use chain ID 31337. Never place raw behavioral records or model vectors on
+chain; submit only commitments and validation metadata.
 
-`audit.py` uses canonical JSON and SHA3-256 so the demo has no blockchain
-dependency. Ethereum uses Keccak-256, which differs from standardized SHA3-256;
-replace `sha3_256()` with `Web3.keccak()` or the contract's exact ABI encoding
-before comparing commitments with Solidity.
+## Metrics
 
-## Reproducibility and responsible reporting
+- DR = quarantined malicious updates / all malicious updates.
+- FPR = quarantined benign updates / all benign updates.
+- update bypass rate = accepted malicious updates / all malicious updates.
+- downstream ASR = successful predefined global-model attack objectives /
+  attack trials. It requires a trained task model and differs from update-level
+  false negatives.
 
-The default configuration uses 20 devices, a 20% malicious-device ratio, 30
-rounds, and seeds 11, 23, 37, 51, and 79. The attack generators implement label
-flipping, sign flipping, Gaussian noise, and model replacement at the update
-level. Synthetic behavior is intentionally simple and must not be presented as
-TON_IoT or physical-device evidence.
+The synthetic demo reports bypass rate under its correct name. It does not
+relabel it as downstream ASR.
 
-## The complete coding regarding this is uploaded herewith as a .zip file named: "complete_qblock-poisoning-validation.zip"
-## License
+## Reproducibility defaults
 
-MIT. Cite the associated manuscript if you use this implementation in research.
-<img width="932" height="616" alt="Poison_JISA_Table5" src="https://github.com/user-attachments/assets/6fd27a20-7972-43e1-9c9f-9699a49c2397" />
+The configuration uses 20 devices, 30 rounds, two local epochs, batch size 32,
+learning rate 0.01, 20% malicious devices, Dirichlet alpha 0.5, trust threshold
+0.70, reliability eta 0.80, equal poisoning weights, 4,096 shots, and seeds 11,
+23, 37, 51, and 79.
+<img width="1049" height="632" alt="Poison_JISA" src="https://github.com/user-attachments/assets/5f3360fa-d48a-46ca-bbb6-43f88ac3518f" />
+
+## Citation and license
+
+See `CITATION.cff`. Code is released under the MIT License. Dataset and
+third-party licenses remain with their respective owners.
+
 
 
 
