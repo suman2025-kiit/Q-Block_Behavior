@@ -183,6 +183,18 @@ The present package does not model full denial-of-service attacks against an ent
 
 Use the BibTeX entries in `docs/CITATION.bib` for the TON_IoT dataset and this software artifact.
 
+## Dataset
+
+This work uses the TON_IoT dataset. The dataset is not redistributed in this repository due to dataset ownership and distribution restrictions.
+
+Download the dataset from:
+
+https://research.unsw.edu.au/projects/toniot-datasets
+
+After downloading, place the network-flow file as:
+
+data/Train_Test_Network.csv
+
 ## Notes for GitHub Upload
 
 Before uploading:
