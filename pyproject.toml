@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qblock-behavior"
+version = "0.1.0"
+description = "Simulation-driven blockchain-integrated quantum trust for poisoning-resilient IoBT federated learning."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  { name = "Suman Majumder" }
+]
+dependencies = [
+  "numpy>=1.26.0",
+  "pandas>=2.0.0",
+  "scikit-learn>=1.3.0",
+  "pyyaml>=6.0.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["qblock_behavior*"]
+
